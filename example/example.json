@@ -23,7 +23,7 @@
                 }
             },
             "success": {
-                "status": 404
+                "status": 400
             }
         },
         {
@@ -31,12 +31,26 @@
             "query": {
                 "route": "example.hello",
                 "input": {
-                    "text": "Matt"
+                    "text": "Matt2"
                 }
             },
             "success": {
                 "data": {
-                    "greeting": "Hello Matt"
+                    "greeting": "Hello Matt2"
+                }
+            }
+        },
+        {
+            "name": "bad data query",
+            "query": {
+                "route": "example.hello",
+                "input": {
+                    "text": "Matt2"
+                }
+            },
+            "success": {
+                "data": {
+                    "farewell": "Goodbye Matt2"
                 }
             }
         }

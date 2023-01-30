@@ -1,5 +1,12 @@
 import fs from "fs";
-import { TestQuery } from "./types";
+import { TestQuery, TestSuccess } from "./types";
+import { validateQueryResponse } from "./validator";
+
+interface TrpcResponse {
+    status: number;
+    headers: Headers;
+    data: any;
+}
 
 const buildBatchedQueryUrl = (base:string, routes:string[], inputs:any[]) => {
     // correct for potential variations
@@ -18,7 +25,7 @@ const buildBatchedQueryUrl = (base:string, routes:string[], inputs:any[]) => {
         }
     };
 
-    console.log(JSON.stringify(batchedInput));
+    // console.log(JSON.stringify(batchedInput));
 
     const inputString = encodeURIComponent(JSON.stringify(batchedInput));
 
@@ -45,26 +52,20 @@ const interpretBatchedData = (data:any[]) => {
     }
 }
 
-const runQuery = (url:string, query:TestQuery) => {
+const runQuery = async (url:string, query:TestQuery, success:TestSuccess) => {
     const requestUrl = buildBatchedQueryUrl(url, [ query.route ], [ query.input ]);
-    console.log(requestUrl);
 
-    fetch(requestUrl)
-        .then((response) => response.json())
-        .then((data) => {
-            try {
-                const name = (Math.random() * 1000).toFixed(0) + ".json"
-                fs.writeFile(`responses/${name}`, JSON.stringify(data), { flag: "w+" }, () => {});
-                console.log(`check ${name}`);
-            }
-            catch (err) {
-                console.error(err);
-            }
+    const response = await fetch(requestUrl);
+    const data = await response.json();
 
-            interpretBatchedData(data);
+    const passthrough = {
+        status: response.status,
+        headers: response.headers,
+        data: data
+    }
 
-            console.log("got data");
-        });
+    const result = validateQueryResponse(passthrough, success);
+    console.log(`    -> ${result.pass ? "PASS" : "FAIL" }\t${result.message}`);
 }
 
-export { runQuery };
+export { runQuery, TrpcResponse };

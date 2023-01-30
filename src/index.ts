@@ -1,15 +1,10 @@
 #!/usr/bin/env node
 import fs from "fs";
 import { runQuery } from "./runner";
-import { TestSequence, TestQuery, TestMutation } from "./types";
+import { TestSequence } from "./types";
 
-fs.readFile("example/example.json", "utf-8", (error, data) => {
-    if (error) {
-        console.error(error);
-        return;
-    }
-
-    const sequence: TestSequence = JSON.parse(data);
+const execute = async (commands:string) => {
+    const sequence: TestSequence = JSON.parse(commands);
 
     console.log(`Testing '${sequence.name}'`);
 
@@ -31,21 +26,25 @@ fs.readFile("example/example.json", "utf-8", (error, data) => {
 
         if (query) {
             console.log(`  - QUERY: ${query.route}`)
-            runQuery(url, query);
+            await runQuery(url, query, success);
+            // const response = runQuery(url, query).then((r) => );
+            // const result = validateQueryResponse(response, success);
+
         }
         if (mutation) {
             console.log(`  - MUTATION: ${mutation.route}`);
         }
 
     }
+}
 
-    // sequence.tests.forEach(test => {
-    //     console.log(`Testing ${test["name"]}`);
-    //     runQuery(url);
-    // });
+fs.readFile("example/example.json", "utf-8", async (error, data) => {
+    if (error) {
+        console.error(error);
+        return;
+    }
 
+    execute(data);
 });
-
-// console.log("hi");
 
 export {};
