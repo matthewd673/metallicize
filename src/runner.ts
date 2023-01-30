@@ -1,6 +1,6 @@
 import fs from "fs";
 import { TestMutation, TestQuery, TestSuccess } from "./types";
-import { validateResponse } from "./validator";
+import { validateResponse, ValidationResult } from "./validator";
 
 interface TrpcResponse {
     status: number;
@@ -65,10 +65,13 @@ const runQueries = async (url:string, queries:TestQuery[], success:TestSuccess) 
     const passthrough = {
         status: response.status,
         headers: response.headers,
-        data: data
+        data: data,
     }
 
-    return validateResponse(passthrough, success);
+    return {
+        errors: validateResponse(passthrough, success),
+        requestUrl: requestUrl,
+    }
 }
 
 const runMutations = async (url:string, mutations:TestMutation[], success:TestSuccess) => {
@@ -94,10 +97,13 @@ const runMutations = async (url:string, mutations:TestMutation[], success:TestSu
     const passthrough = {
         status: response.status,
         headers: response.headers,
-        data: data
+        data: data,
     }
 
-    return validateResponse(passthrough, success);
+    return {
+        errors: validateResponse(passthrough, success),
+        requestUrl: requestUrl,
+    }
 }
 
 export { runQueries, runMutations, TrpcResponse };

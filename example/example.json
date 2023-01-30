@@ -45,12 +45,12 @@
             "query": {
                 "route": "example.hello",
                 "input": {
-                    "text": "Matt2"
+                    "text": "Matt3"
                 }
             },
             "success": {
                 "data": {
-                    "farewell": "Goodbye Matt2"
+                    "farewell": "Goodbye Matt3"
                 }
             }
         },

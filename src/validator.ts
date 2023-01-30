@@ -75,25 +75,25 @@ const validateResponse = (response:TrpcResponse, success:TestSuccess):Validation
         return [{
             pass: false,
             message: httpTests,
-            index: 0
+            index: 0,
         }]
     }
 
     for (let i = 0; i < response.data.length; i++) {
-        const trpcErrorTests = validateTrpcErrors(response, success);
-        const trpcSuccessTests = validateTrpcSuccesses(response, success);
+        const trpcErrorTests = validateTrpcErrors(response.data[i], success);
+        const trpcSuccessTests = validateTrpcSuccesses(response.data[i], success);
         if (trpcErrorTests) {
             errors.push({
                 pass: false,
                 message: trpcErrorTests,
-                index: i
+                index: i,
             });
         }
         if (trpcSuccessTests) {
             errors.push({
                 pass: false,
                 message: trpcSuccessTests,
-                index: i
+                index: i,
             });
         }
     }

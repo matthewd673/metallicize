@@ -11,14 +11,15 @@ program
     .name("metallicize")
     .description("Simple test runner for tRPC")
     .version("0.0.1")
+    .option("-d --detailed", "view additional details about each test (often very verbose)");
 
 program.argument("<test-sequence-file>", "The test sequence to execute");
 
 const execute = async (commands:string) => {
     const sequence: TestSequence = JSON.parse(commands);
 
-    process.stdout.write(`${chalk.bgWhite.black(" metallicize ")} `);
-    process.stdout.write(`Testing '${chalk.bold(sequence.name)}'...\n`);
+    process.stdout.write(`${chalk.bgWhite.black(" metallicize ")}\t`);
+    process.stdout.write(`Testing '${chalk.bold(sequence.name)}'...\n\n`);
 
     const url = sequence.url;
 
@@ -79,21 +80,27 @@ const execute = async (commands:string) => {
         }
 
         // print results
-        if (result.length === 0) {
+        if (result.errors.length === 0) {
             process.stdout.write(`${chalk.bgGreen.black(" PASS ")}\n`);
             passed++;
         }
         else {
             process.stdout.write(`${chalk.bgRed.black(" FAIL ")} `);
-            if (result.length === 1) {
-                process.stdout.write(`${chalk.gray(result[0].message)}\n`);
+            if (result.errors.length === 1) {
+                process.stdout.write(`${chalk.gray(result.errors[0].message)}\n`);
             }
             else {
-                process.stdout.write(`${chalk.red(`${result.length} errors`)}\n`);
-                for (let i = 0; i < result.length; i++) {
-                    console.log(`\t\t\t${chalk.gray(`${result[i].index}: ${result[i].message}`)}`);
+                process.stdout.write(`${chalk.red(`${result.errors.length} errors`)}\n`);
+                for (let i = 0; i < result.errors.length; i++) {
+                    console.log(`\t\t\t${chalk.gray(`${result.errors[i].index}: ${result.errors[i].message}`)}`);
                 }
             }
+        }
+
+        // print details
+        if (program.opts().detailed) {
+            console.log(`${chalk.bgBlue.black(" URL ")}\t${chalk.blue(result.requestUrl)}`)
+            console.log();
         }
     }
 
