@@ -1,4 +1,5 @@
 import fs from "fs";
+import { Timer } from "./timer";
 import { TestMutation, TestQuery, TestSuccess } from "./types";
 import { validateResponse, ValidationResult } from "./validator";
 
@@ -59,19 +60,25 @@ const buildBatchedMutationUrl = (base:string, routes:string[]) => {
 const runQueries = async (url:string, queries:TestQuery[], success:TestSuccess) => {
     const requestUrl = buildBatchedQueryUrl(url, queries.map((q) => q.route), queries.map((q) => q.input));
 
+    const requestTimer = new Timer();
+    requestTimer.start();
+
+    // make request
     const response = await fetch(requestUrl);
     const data = await response.json();
 
-    const passthrough = {
-        status: response.status,
-        headers: response.headers,
-        data: data,
-    }
+    requestTimer.stop();
 
     return {
-        errors: validateResponse(passthrough, success),
+        errors: validateResponse(
+                    {
+                        status: response.status,
+                        headers: response.headers,
+                        data: data,
+                    }, success),
         requestUrl: requestUrl,
         headers: response.headers,
+        duration: requestTimer.ms(),
     }
 }
 
@@ -86,25 +93,31 @@ const runMutations = async (url:string, mutations:TestMutation[], success:TestSu
     }
     const inputString = JSON.stringify(batchedInput);
 
-    const response = await fetch(requestUrl, {
-                                                method: "POST",
-                                                headers: {
-                                                    "Content-Type": "application/json"
-                                                },
-                                                body: inputString
-                                            });
+    const requestTimer = new Timer();
+    requestTimer.start();
+
+    // make request
+    const response = await fetch(requestUrl,
+                            {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: inputString
+                            });
     const data = await response.json();
 
-    const passthrough = {
-        status: response.status,
-        headers: response.headers,
-        data: data,
-    }
+    requestTimer.stop();
 
     return {
-        errors: validateResponse(passthrough, success),
+        errors: validateResponse({
+                    status: response.status,
+                    headers: response.headers,
+                    data: data
+                }, success),
         requestUrl: requestUrl,
         headers: response.headers,
+        duration: requestTimer.ms(),
     }
 }
 

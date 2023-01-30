@@ -114,6 +114,18 @@
             "success": {
                 "status": 200
             }
+        },
+        {
+            "name": "bad route",
+            "query": {
+                "route": "example.doesntExist",
+                "input": {
+                    "text": "error time"
+                }
+            },
+            "success": {
+                "status": 200
+            }
         }
     ]
 }

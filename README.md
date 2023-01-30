@@ -2,7 +2,12 @@
 
 Simple test runner for tRPC.
 
-## Build & Run
+```
+npm i metallicize -g
+metallicize --help
+```
+
+## Build
 ```
 npm run build
 npm i -g
@@ -13,6 +18,7 @@ metallicize <test-sequence-file>
 Run `metallicize --help` for more information.
 
 * `-d --details`
+* `-t --time`
 
 ## Syntax
 ### Sequences

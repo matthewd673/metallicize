@@ -3,9 +3,17 @@
     "name": "Matthew Daly",
     "url": "https://github.com/matthewd673"
   },
-  "version": "0.0.1",
+  "version": "0.0.2",
   "name": "metallicize",
   "description": "Simple test runner for tRPC.",
+  "keywords": [
+    "trpc",
+    "test"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matthewd673/metallicize"
+  },
   "main": "./lib/index.js",
   "bin": {
     "metallicize": "./lib/index.js"
@@ -15,13 +23,12 @@
     "start:windows": "nodemon --watch 'src/**/*.ts' --exec \"npx ts-node\" src/index.ts",
     "create": "npm run build && npm run test",
     "build": "tsc -p .",
-    "local": "sudo npm i -g && metallicize",
+    "local": "npm i -g",
     "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
   },
   "dependencies": {
     "chalk": "^4.1.2",
-    "commander": "^10.0.0",
-    "path": "^0.12.7"
+    "commander": "^10.0.0"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",

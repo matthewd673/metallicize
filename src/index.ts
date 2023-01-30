@@ -11,10 +11,12 @@ const program = new Command();
 program
     .name("metallicize")
     .description("Simple test runner for tRPC")
-    .version("0.0.1")
-    .option("-d --detailed", "view additional details about each test (often very verbose)");
+    .version("0.0.2")
+    .option("-d --detailed", "view additional details about each test (often very verbose)")
+    .option("-t --time", "time the duration of every test request");
 
 program.argument("<test-sequence-file>", "The test sequence to execute");
+program.argument("[output-csv-file]", "The path to write the results CSV");
 
 const execute = async (commands:string) => {
 
@@ -38,7 +40,7 @@ const execute = async (commands:string) => {
     for (let i = 0; i < sequence.tests.length; i++) {
         const test = sequence.tests[i];
 
-        process.stdout.write(`${test.name}\t`);
+        process.stdout.write(`${test.name ? test.name : "(unnamed)"}\t`);
 
         const query = test.query;
         const mutation = test.mutation;
@@ -55,7 +57,12 @@ const execute = async (commands:string) => {
         if (mutationBatch) defined++;
         if (defined != 1) {
             process.stdout.write(`${chalk.bgYellow.black(" JSON ")} `);
-            process.stdout.write(`${chalk.gray("Multiple tests defined, did you mean to batch them?")}\n`);
+            if (defined > 1) {
+                process.stdout.write(`${chalk.gray("Multiple API calls, did you mean to batch them?")}\n`);
+            }
+            else if (defined == 0) {
+                process.stdout.write(`${chalk.gray("No API call defined")}\n`);
+            }
             continue;
         }
 
@@ -86,11 +93,21 @@ const execute = async (commands:string) => {
 
         // print results
         if (result.errors.length === 0) {
-            process.stdout.write(`${chalk.bgGreen.black(" PASS ")}\n`);
+            process.stdout.write(`${chalk.bgGreen.black(" PASS ")}`);
+            // print time
+            if (program.opts().time) {
+                process.stdout.write(` ${chalk.green(`${(result.duration / 1000).toFixed(2)}s`)}`)
+            }
+            process.stdout.write("\n");
             passed++;
         }
         else {
             process.stdout.write(`${chalk.bgRed.black(" FAIL ")} `);
+            // print time
+            if (program.opts().time) {
+                process.stdout.write(`${chalk.red(`${(result.duration / 1000).toFixed(2)}s`)} `);
+            }
+
             if (result.errors.length === 1) {
                 process.stdout.write(`${chalk.gray(result.errors[0].message)}\n`);
             }
@@ -130,7 +147,6 @@ const execute = async (commands:string) => {
 const main = () => {
 
     program.parse();
-    const options = program.opts();
     const args = program.args;
 
     // read & execute test file
