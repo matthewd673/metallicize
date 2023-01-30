@@ -3,7 +3,7 @@
     "url": "http://localhost:3000/api/trpc",
     "tests": [
         {
-            "name": "query",
+            "name": "valid query",
             "query": {
                 "route": "example.hello",
                 "input": {
@@ -12,6 +12,32 @@
             },
             "success": {
                 "status": 200
+            }
+        },
+        {
+            "name": "bad query",
+            "query": {
+                "route": "example.hello",
+                "input": {
+                    "text": "404pls"
+                }
+            },
+            "success": {
+                "status": 404
+            }
+        },
+        {
+            "name": "data query",
+            "query": {
+                "route": "example.hello",
+                "input": {
+                    "text": "Matt"
+                }
+            },
+            "success": {
+                "data": {
+                    "greeting": "Hello Matt"
+                }
             }
         }
     ]

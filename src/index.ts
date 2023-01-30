@@ -1,33 +1,7 @@
 #!/usr/bin/env node
 import fs from "fs";
 import { runQuery } from "./runner";
-
-interface TestSuccess {
-    status?: number;
-}
-
-interface TestQuery {
-    route: string;
-    input: any;
-}
-
-interface TestMutation {
-    route: string;
-    input: any;
-}
-
-interface TestStep {
-    name: string;
-    query?: TestQuery;
-    mutation?: TestMutation;
-    success: TestSuccess;
-}
-
-interface TestSequence {
-    name: string;
-    url: string;
-    tests: TestStep[];
-}
+import { TestSequence, TestQuery, TestMutation } from "./types";
 
 fs.readFile("example/example.json", "utf-8", (error, data) => {
     if (error) {
@@ -57,7 +31,7 @@ fs.readFile("example/example.json", "utf-8", (error, data) => {
 
         if (query) {
             console.log(`  - QUERY: ${query.route}`)
-            runQuery(url);
+            runQuery(url, query);
         }
         if (mutation) {
             console.log(`  - MUTATION: ${mutation.route}`);
