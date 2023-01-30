@@ -11,16 +11,22 @@ program
     .name("metallicize")
     .description("Simple test runner for tRPC")
     .version("0.0.1")
-    .option("-m, --minimal")
 
 program.argument("<test-sequence-file>", "The test sequence to execute");
 
 const execute = async (commands:string) => {
     const sequence: TestSequence = JSON.parse(commands);
 
-    console.log(`Testing '${sequence.name}'`);
+    process.stdout.write(`${chalk.bgWhite.black(" metallicize ")} `);
+    process.stdout.write(`Testing '${chalk.bold(sequence.name)}'...\n`);
 
     const url = sequence.url;
+
+    // make sure server is running
+    const serverOk = await fetch(url).catch(error => console.log(`${chalk.yellow("Failed to connect to")} ${chalk.yellow.bold(url)}`));
+    if (!serverOk) {
+        return;
+    }
 
     let passed = 0;
     for (let i = 0; i < sequence.tests.length; i++) {
@@ -94,10 +100,10 @@ const execute = async (commands:string) => {
     console.log("");
     process.stdout.write(`${chalk.bgWhite.black(" DONE ")} `);
     if (passed === sequence.tests.length) {
-        process.stdout.write(`${chalk.green(`Passed ${passed}/${sequence.tests.length} tests`)}\n`);
+        process.stdout.write(`${chalk.green(`Passed ${chalk.bold(`${passed}/${sequence.tests.length}`)} tests`)}\n`);
     }
     else {
-        process.stdout.write(`${chalk.red(`Passed ${passed}/${sequence.tests.length} tests`)}\n`);
+        process.stdout.write(`${chalk.red(`Passed ${chalk.bold(`${passed}/${sequence.tests.length}`)} tests`)}\n`);
     }
 }
 

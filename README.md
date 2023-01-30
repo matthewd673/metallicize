@@ -2,8 +2,11 @@
 
 Simple test runner for tRPC.
 
+## Build & Run
 ```
-metallicize test.json
+npm run build
+npm i -g
+metallicize <test-sequence-file>
 ```
 
 ## Syntax
