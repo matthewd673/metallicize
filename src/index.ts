@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import fs from "fs";
 import { Command } from "commander";
-import { runQuery } from "./runner";
+import { runMutation, runQuery } from "./runner";
 import { TestSequence } from "./types";
+import chalk from "chalk";
 
 const program = new Command();
 
@@ -25,7 +26,8 @@ const execute = async (commands:string) => {
     for (let i = 0; i < sequence.tests.length; i++) {
         const test = sequence.tests[i];
 
-        console.log(`- ${test.name}`);
+        // console.log(`- ${test.name}`);
+        process.stdout.write(`${test.name}\t`);
 
         const query = test.query;
         const mutation = test.mutation;
@@ -36,12 +38,26 @@ const execute = async (commands:string) => {
             continue;
         }
 
+        let result = undefined;
         if (query) {
-            console.log(`  - QUERY: ${query.route}`)
-            if (await runQuery(url, query, success)) { passed++; }
+            result = await runQuery(url, query, success);
         }
         if (mutation) {
-            console.log(`  - MUTATION: ${mutation.route}`);
+            result = await runMutation(url, mutation, success);
+        }
+
+        if (!result) {
+            process.stdout.write(`${chalk.bgYellow.black(" NO RESULT ")}\n`);
+            return;
+        }
+
+        if (result.pass) {
+            process.stdout.write(`${chalk.bgGreen.black(" PASS ")}\n`);
+            passed++;
+        }
+        else {
+            process.stdout.write(`${chalk.bgRed.black(" FAIL ")} `);
+            process.stdout.write(`${chalk.gray(result.message)}\n`);
         }
     }
 

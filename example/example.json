@@ -53,6 +53,18 @@
                     "farewell": "Goodbye Matt2"
                 }
             }
+        },
+        {
+            "name": "mutation",
+            "mutation": {
+                "route": "example.makeChange",
+                "input": {
+                    "count": 8
+                }
+            },
+            "success": {
+                "status": 200
+            }
         }
     ]
 }

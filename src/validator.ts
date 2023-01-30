@@ -96,7 +96,7 @@ const validateTrpcSuccesses = (response:TrpcResponse, success:TestSuccess) => {
     }
 }
 
-const validateQueryResponse = (response:TrpcResponse, success:TestSuccess) => {
+const validateResponse = (response:TrpcResponse, success:TestSuccess) => {
     const httpTests = validateHttp(response, success);
     if (httpTests) {
         return httpTests;
@@ -118,4 +118,4 @@ const validateQueryResponse = (response:TrpcResponse, success:TestSuccess) => {
     };
 }
 
-export { validateQueryResponse };
+export { validateResponse };

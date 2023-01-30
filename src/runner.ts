@@ -1,6 +1,6 @@
 import fs from "fs";
-import { TestQuery, TestSuccess } from "./types";
-import { validateQueryResponse } from "./validator";
+import { TestMutation, TestQuery, TestSuccess } from "./types";
+import { validateResponse } from "./validator";
 
 interface TrpcResponse {
     status: number;
@@ -34,24 +34,20 @@ const buildBatchedQueryUrl = (base:string, routes:string[], inputs:any[]) => {
     return `${base}${routeString}?batch=1&input=${inputString}`;
 }
 
-const interpretBatchedData = (data:any[]) => {
-    // for every response received
-    for (let i = 0; i < data.length; i++) {
-        const response = data[i];
-
-        // got a result
-        if (response.result) {
-            console.log(response.result.data.json);
-        }
-
-        // got an error
-        if (response.error) {
-            console.log(response.error.json);
-        }
+const buildBatchedMutationUrl = (base:string, routes:string[]) => {
+    // correct for potential variations
+    base = base.endsWith("/") ? base : base + "/";
+    for (let i = 0; i < routes.length; i++) {
+        routes[i] = routes[i].replace("/", ".");
     }
+
+    const routeString = routes[0];
+
+    return `${base}${routeString}?batch=${routes.length}`;
 }
 
 const runQuery = async (url:string, query:TestQuery, success:TestSuccess) => {
+    // TODO: support batched
     const requestUrl = buildBatchedQueryUrl(url, [ query.route ], [ query.input ]);
 
     const response = await fetch(requestUrl);
@@ -63,10 +59,36 @@ const runQuery = async (url:string, query:TestQuery, success:TestSuccess) => {
         data: data
     }
 
-    const result = validateQueryResponse(passthrough, success);
-    console.log(`    -> ${result.pass ? "PASS" : "FAIL" }\t${result.message}`);
-
-    return result.pass;
+    return validateResponse(passthrough, success);
 }
 
-export { runQuery, TrpcResponse };
+const runMutation = async (url:string, mutation:TestMutation, success:TestSuccess) => {
+    // TODO: support batched
+    const requestUrl = buildBatchedMutationUrl(url, [ mutation.route ]);
+
+    const batchedInput = {
+        0: {
+            "json": mutation.input
+        }
+    }
+    const inputString = JSON.stringify(batchedInput);
+
+    const response = await fetch(requestUrl, {
+                                                method: "POST",
+                                                headers: {
+                                                    "Content-Type": "application/json"
+                                                },
+                                                body: inputString
+                                            });
+    const data = await response.json();
+
+    const passthrough = {
+        status: response.status,
+        headers: response.headers,
+        data: data
+    }
+
+    return validateResponse(passthrough, success);
+}
+
+export { runQuery, runMutation, TrpcResponse };
