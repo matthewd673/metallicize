@@ -15,20 +15,23 @@ const buildBatchedQueryUrl = (base:string, routes:string[], inputs:any[]) => {
         routes[i] = routes[i].replace("/", ".");
     }
 
-    if (routes.length != inputs.length) {
-        console.error("Bad batch, mismatched lengths");
-    }
-
-    // TODO: batch multiple
-    const batchedInput = {
-        0: {
-            "json": inputs[0]
+    // batch all inputs
+    let batchedInput:any = {}
+    for (let i = 0; i < inputs.length; i++) {
+        batchedInput[i.toString()] = {
+            "json": inputs[i]
         }
-    };
-
+    }
     const inputString = encodeURIComponent(JSON.stringify(batchedInput));
-    // TODO: multiple routes in string
-    const routeString = routes[0];
+
+    // batch all routes
+    let routeString = "";
+    for (let i = 0; i < routes.length; i++) {
+        routeString += routes[i];
+        if (i < routes.length - 1) {
+            routeString += ",";
+        }
+    }
 
     // just batch one for now
     return `${base}${routeString}?batch=1&input=${inputString}`;
@@ -41,14 +44,20 @@ const buildBatchedMutationUrl = (base:string, routes:string[]) => {
         routes[i] = routes[i].replace("/", ".");
     }
 
-    const routeString = routes[0];
+    // batch all routes
+    let routeString = "";
+    for (let i = 0; i < routes.length; i++) {
+        routeString += routes[i];
+        if (i < routes.length - 1) {
+            routeString += ",";
+        }
+    }
 
     return `${base}${routeString}?batch=${routes.length}`;
 }
 
-const runQuery = async (url:string, query:TestQuery, success:TestSuccess) => {
-    // TODO: support batched
-    const requestUrl = buildBatchedQueryUrl(url, [ query.route ], [ query.input ]);
+const runQueries = async (url:string, queries:TestQuery[], success:TestSuccess) => {
+    const requestUrl = buildBatchedQueryUrl(url, queries.map((q) => q.route), queries.map((q) => q.input));
 
     const response = await fetch(requestUrl);
     const data = await response.json();
@@ -62,13 +71,13 @@ const runQuery = async (url:string, query:TestQuery, success:TestSuccess) => {
     return validateResponse(passthrough, success);
 }
 
-const runMutation = async (url:string, mutation:TestMutation, success:TestSuccess) => {
-    // TODO: support batched
-    const requestUrl = buildBatchedMutationUrl(url, [ mutation.route ]);
+const runMutations = async (url:string, mutations:TestMutation[], success:TestSuccess) => {
+    const requestUrl = buildBatchedMutationUrl(url, mutations.map((m) => m.route));
 
-    const batchedInput = {
-        0: {
-            "json": mutation.input
+    let batchedInput:any = {}
+    for (let i = 0; i < mutations.length; i++) {
+        batchedInput[i.toString()] = {
+            "json": mutations[i].input
         }
     }
     const inputString = JSON.stringify(batchedInput);
@@ -91,4 +100,4 @@ const runMutation = async (url:string, mutation:TestMutation, success:TestSucces
     return validateResponse(passthrough, success);
 }
 
-export { runQuery, runMutation, TrpcResponse };
+export { runQueries, runMutations, TrpcResponse };

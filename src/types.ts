@@ -19,6 +19,8 @@ interface TestStep {
     name: string;
     query?: TestQuery;
     mutation?: TestMutation;
+    queries?: TestQuery[];
+    mutations?: TestMutation[];
     success: TestSuccess;
 }
 

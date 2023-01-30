@@ -65,6 +65,52 @@
             "success": {
                 "status": 200
             }
+        },
+        {
+            "name": "query batch",
+            "queries": [
+                {
+                    "route": "example.hello",
+                    "input": {
+                        "text": "Red Fish"
+                    }
+                },
+                {
+                    "route": "example.hello",
+                    "input": {
+                        "text": "Blue Fish"
+                    }
+                }
+            ],
+            "success": {
+                "code": "NOT_FOUND"
+            }
+        },
+        {
+            "name": "mut batch",
+            "mutations": [
+                {
+                    "route": "example.makeChange",
+                    "input": {
+                        "count": 2
+                    }
+                },
+                {
+                    "route": "example.makeChange",
+                    "input": {
+                        "count": 4
+                    }
+                },
+                {
+                    "route": "example.makeChange",
+                    "input": {
+                        "count": 6
+                    }
+                }
+            ],
+            "success": {
+                "status": 200
+            }
         }
     ]
 }

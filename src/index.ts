@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import fs from "fs";
 import { Command } from "commander";
-import { runMutation, runQuery } from "./runner";
+import { runQueries, runMutations } from "./runner";
 import { TestSequence } from "./types";
 import chalk from "chalk";
 
@@ -26,43 +26,79 @@ const execute = async (commands:string) => {
     for (let i = 0; i < sequence.tests.length; i++) {
         const test = sequence.tests[i];
 
-        // console.log(`- ${test.name}`);
         process.stdout.write(`${test.name}\t`);
 
         const query = test.query;
         const mutation = test.mutation;
+        const queryBatch = test.queries;
+        const mutationBatch = test.mutations;
         const success = test.success;
 
-        if (query && mutation) {
-            console.error("Only one query/mutation can run per test");
+        // validate json
+        // only one type of test being performed
+        let defined = 0;
+        if (query) defined++;
+        if (mutation) defined++;
+        if (queryBatch) defined++;
+        if (mutationBatch) defined++;
+        if (defined != 1) {
+            process.stdout.write(`${chalk.bgYellow.black(" JSON ")} `);
+            process.stdout.write(`${chalk.gray("Multiple tests defined, did you mean to batch them?")}\n`);
+            continue;
+        }
+
+        if (!success) {
+            process.stdout.write(`${chalk.bgYellow.black(" JSON ")} `);
+            process.stdout.write(`${chalk.gray("Success is not defined")}\n`);
             continue;
         }
 
         let result = undefined;
         if (query) {
-            result = await runQuery(url, query, success);
+            result = await runQueries(url, [query], success);
         }
-        if (mutation) {
-            result = await runMutation(url, mutation, success);
+        else if (queryBatch) {
+            result = await runQueries(url, queryBatch, success);
+        }
+        else if (mutation) {
+            result = await runMutations(url, [mutation], success);
+        }
+        else if (mutationBatch) {
+            result = await runMutations(url, mutationBatch, success);
         }
 
         if (!result) {
-            process.stdout.write(`${chalk.bgYellow.black(" NO RESULT ")}\n`);
+            process.stdout.write(`${chalk.bgYellow.black(" NULL ")}\n`);
             return;
         }
 
-        if (result.pass) {
+        // print results
+        if (result.length === 0) {
             process.stdout.write(`${chalk.bgGreen.black(" PASS ")}\n`);
             passed++;
         }
         else {
             process.stdout.write(`${chalk.bgRed.black(" FAIL ")} `);
-            process.stdout.write(`${chalk.gray(result.message)}\n`);
+            if (result.length === 1) {
+                process.stdout.write(`${chalk.gray(result[0].message)}\n`);
+            }
+            else {
+                process.stdout.write(`${chalk.red(`${result.length} errors`)}\n`);
+                for (let i = 0; i < result.length; i++) {
+                    console.log(`\t\t\t${chalk.gray(`${result[i].index}: ${result[i].message}`)}`);
+                }
+            }
         }
     }
 
-    console.log("DONE");
-    console.log(` - Passed ${passed}/${sequence.tests.length} tests`);
+    console.log("");
+    process.stdout.write(`${chalk.bgWhite.black(" DONE ")} `);
+    if (passed === sequence.tests.length) {
+        process.stdout.write(`${chalk.green(`Passed ${passed}/${sequence.tests.length} tests`)}\n`);
+    }
+    else {
+        process.stdout.write(`${chalk.red(`Passed ${passed}/${sequence.tests.length} tests`)}\n`);
+    }
 }
 
 const main = () => {

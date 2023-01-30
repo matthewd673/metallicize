@@ -4,58 +4,42 @@ import { TestSuccess } from "./types";
 interface ValidationResult {
     pass: boolean;
     message: string;
+    index: number;
 }
 
 const validateHttp = (response:TrpcResponse, success:TestSuccess) => {
     // success.status
     if (success.status && success.status !== response.status) {
-        return {
-            pass: false,
-            message: `Expected status ${success.status} but got ${response.status}`
-        }
+        return `Expected status ${success.status} but got ${response.status}`;
     }
 }
 
-const validateTrpcErrors = (response:TrpcResponse, success:TestSuccess) => {
-    // TODO: batched responses
-    const resError = response.data[0].error?.json;
+const validateTrpcErrors = (data:any, success:TestSuccess) => {
+    const resError = data.error?.json;
 
     // success.code
     if (success.code && resError?.data?.code) {
         if (success.code !== resError?.data?.code) {
-            return {
-                pass: false,
-                message: `Expected code '${success.code}' but got code '${resError?.data?.code}'`
-            }
+            return `Expected code '${success.code}' but got code '${resError?.data?.code}'`;
         }
     }
     else if (success.code) {
-        return {
-            pass: false,
-            message: "Response did not contain error code"
-        }
+        return `Response did not contain error code`;
     }
 
     // success.errorMessage
     if (success.errorMessage && resError?.message) {
         if (success.errorMessage !== resError?.message) {
-            return {
-                pass: false,
-                message: `Expected a different error message`
-            }
+            return `Expected a different error message`;
         }
     }
     else if (success.errorMessage) {
-        return {
-            pass: false,
-            message: "Response did not contain error message"
-        }
+        return `Response did not contain error message`;
     }
 }
 
-const validateTrpcSuccesses = (response:TrpcResponse, success:TestSuccess) => {
-    // TODO: batched responses
-    const resData = response.data[0].result?.data?.json;
+const validateTrpcSuccesses = (data:any, success:TestSuccess) => {
+    const resData = data.result?.data?.json;
 
     // success.data
     if (success.data && resData) {
@@ -63,59 +47,58 @@ const validateTrpcSuccesses = (response:TrpcResponse, success:TestSuccess) => {
         const resKeys = Object.keys(resData).sort();
 
         if (keys.length !== resKeys.length) {
-            return {
-                pass: false,
-                message: `Expected a different number of data values`
-            }
+            return `Expected a different number of data values`;
         }
 
         for (let i = 0; i < keys.length; i++) {
             if (resKeys[i] !== keys[i]) {
-                return {
-                    pass: false,
-                    message: `Response contained unexpected key '${resKeys[i]}'`
-                }
+                return `Response contained unexpected key '${resKeys[i]}'`;
             }
         }
 
         for (let i = 0; i < keys.length; i++) {
             if (success.data[keys[i]] !== resData[keys[i]]) {
-                return {
-                    pass: false,
-                    message: `Value of '${keys[i]}' differed`
-                }
+                return `Value of '${keys[i]}' differed`;
             }
         }
     }
     else if (success.data && !resData) {
-        // console.log(response.data.result.data);
-        return {
-            pass: false,
-            message: `Response did not contain data`
-        }
+        return `Response did not contain data`;
     }
 }
 
-const validateResponse = (response:TrpcResponse, success:TestSuccess) => {
+const validateResponse = (response:TrpcResponse, success:TestSuccess):ValidationResult[] => {
+    let errors:ValidationResult[] = [];
+
     const httpTests = validateHttp(response, success);
     if (httpTests) {
-        return httpTests;
+        return [{
+            pass: false,
+            message: httpTests,
+            index: 0
+        }]
     }
 
-    const trpcErrorTests = validateTrpcErrors(response, success);
-    if (trpcErrorTests) {
-        return trpcErrorTests;
+    for (let i = 0; i < response.data.length; i++) {
+        const trpcErrorTests = validateTrpcErrors(response, success);
+        const trpcSuccessTests = validateTrpcSuccesses(response, success);
+        if (trpcErrorTests) {
+            errors.push({
+                pass: false,
+                message: trpcErrorTests,
+                index: i
+            });
+        }
+        if (trpcSuccessTests) {
+            errors.push({
+                pass: false,
+                message: trpcSuccessTests,
+                index: i
+            });
+        }
     }
 
-    const trpcSuccessTests = validateTrpcSuccesses(response, success);
-    if (trpcSuccessTests) {
-        return trpcSuccessTests;
-    }
-
-    return {
-        pass: true,
-        message: "All cases passed"
-    };
+    return errors;
 }
 
-export { validateResponse };
+export { validateResponse, ValidationResult };
