@@ -66,6 +66,8 @@ const runQuery = async (url:string, query:TestQuery, success:TestSuccess) => {
 
     const result = validateQueryResponse(passthrough, success);
     console.log(`    -> ${result.pass ? "PASS" : "FAIL" }\t${result.message}`);
+
+    return result.pass;
 }
 
 export { runQuery, TrpcResponse };

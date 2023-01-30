@@ -1,7 +1,18 @@
 #!/usr/bin/env node
 import fs from "fs";
+import { Command } from "commander";
 import { runQuery } from "./runner";
 import { TestSequence } from "./types";
+
+const program = new Command();
+
+program
+    .name("trpc_test")
+    .description("Simple test runner for tRPC")
+    .version("0.0.1")
+    .option("-m, --minimal")
+
+program.argument("<test-sequence-file>", "The test sequence to execute");
 
 const execute = async (commands:string) => {
     const sequence: TestSequence = JSON.parse(commands);
@@ -10,6 +21,7 @@ const execute = async (commands:string) => {
 
     const url = sequence.url;
 
+    let passed = 0;
     for (let i = 0; i < sequence.tests.length; i++) {
         const test = sequence.tests[i];
 
@@ -26,25 +38,36 @@ const execute = async (commands:string) => {
 
         if (query) {
             console.log(`  - QUERY: ${query.route}`)
-            await runQuery(url, query, success);
-            // const response = runQuery(url, query).then((r) => );
-            // const result = validateQueryResponse(response, success);
-
+            if (await runQuery(url, query, success)) { passed++; }
         }
         if (mutation) {
             console.log(`  - MUTATION: ${mutation.route}`);
         }
-
     }
+
+    console.log("DONE");
+    console.log(` - Passed ${passed}/${sequence.tests.length} tests`);
 }
 
-fs.readFile("example/example.json", "utf-8", async (error, data) => {
-    if (error) {
-        console.error(error);
-        return;
-    }
+const main = () => {
 
-    execute(data);
-});
+    program.parse();
+    const options = program.opts();
+    const args = program.args;
+
+    // read & execute test file
+    fs.readFile(args[0], "utf-8", async (error, data) => {
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        execute(data);
+    });
+}
+
+if (require.main === module) {
+    main();
+}
 
 export {};
