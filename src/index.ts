@@ -8,7 +8,7 @@ import chalk from "chalk";
 const program = new Command();
 
 program
-    .name("trpc_test")
+    .name("metallicize")
     .description("Simple test runner for tRPC")
     .version("0.0.1")
     .option("-m, --minimal")
