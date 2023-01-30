@@ -12,6 +12,16 @@ const validateHttp = (response:TrpcResponse, success:TestSuccess) => {
     if (success.status && success.status !== response.status) {
         return `Expected status ${success.status} but got ${response.status}`;
     }
+
+    // success.headers
+    if (success.headers) {
+        const headers = Object.keys(success.headers).sort();
+        for (let i = 0; i < headers.length; i++) {
+            if (success.headers[headers[i]] !== response.headers.get(headers[i])) {
+                return `Header ${headers[i]} differed`;
+            }
+        }
+    }
 }
 
 const validateTrpcErrors = (data:any, success:TestSuccess) => {
@@ -44,15 +54,19 @@ const validateTrpcSuccesses = (data:any, success:TestSuccess) => {
     // success.data
     if (success.data && resData) {
         const keys = Object.keys(success.data).sort();
-        const resKeys = Object.keys(resData).sort();
 
-        if (keys.length !== resKeys.length) {
-            return `Expected a different number of data values`;
-        }
+        // strict
+        if (success.dataStrict) {
+            const resKeys = Object.keys(resData).sort();
 
-        for (let i = 0; i < keys.length; i++) {
-            if (resKeys[i] !== keys[i]) {
-                return `Response contained unexpected key '${resKeys[i]}'`;
+            if (keys.length !== resKeys.length) {
+                return `Expected a different number of data values`;
+            }
+
+            for (let i = 0; i < keys.length; i++) {
+                if (resKeys[i] !== keys[i]) {
+                    return `Response contained unexpected key '${resKeys[i]}'`;
+                }
             }
         }
 

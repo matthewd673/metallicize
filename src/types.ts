@@ -2,7 +2,9 @@ interface TestSuccess {
     status?: number;
     code?: string;
     errorMessage?: string;
+    dataStrict?: boolean;
     data?: any;
+    headers?: any;
 }
 
 interface TestQuery {

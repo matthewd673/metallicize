@@ -3,6 +3,7 @@ import fs from "fs";
 import { Command } from "commander";
 import { runQueries, runMutations } from "./runner";
 import { TestSequence } from "./types";
+import { Timer } from "./timer";
 import chalk from "chalk";
 
 const program = new Command();
@@ -16,6 +17,10 @@ program
 program.argument("<test-sequence-file>", "The test sequence to execute");
 
 const execute = async (commands:string) => {
+
+    const executionTimer = new Timer();
+    executionTimer.start();
+
     const sequence: TestSequence = JSON.parse(commands);
 
     process.stdout.write(`${chalk.bgWhite.black(" metallicize ")}\t`);
@@ -101,16 +106,24 @@ const execute = async (commands:string) => {
         if (program.opts().detailed) {
             console.log(`${chalk.bgBlue.black(" URL ")}\t${chalk.blue(result.requestUrl)}`)
             console.log();
+
+            let headerString = "\t[\n";
+            result.headers.forEach((value, key) => { headerString += `\t\t{\"${key}\": \"${value}\"},\n`});
+            headerString += "\t]\n";
+            console.log(`${chalk.bgBlue.black(" HEADERS ")}\n${chalk.blue(headerString)}`)
+            console.log();
         }
     }
+
+    executionTimer.stop();
 
     console.log("");
     process.stdout.write(`${chalk.bgWhite.black(" DONE ")} `);
     if (passed === sequence.tests.length) {
-        process.stdout.write(`${chalk.green(`Passed ${chalk.bold(`${passed}/${sequence.tests.length}`)} tests`)}\n`);
+        process.stdout.write(`${chalk.green(`Passed ${chalk.bold(`${passed}/${sequence.tests.length}`)} tests in ${executionTimer.s().toFixed(2)}s`)}\n`);
     }
     else {
-        process.stdout.write(`${chalk.red(`Passed ${chalk.bold(`${passed}/${sequence.tests.length}`)} tests`)}\n`);
+        process.stdout.write(`${chalk.red(`Passed ${chalk.bold(`${passed}/${sequence.tests.length}`)} tests in ${executionTimer.s().toFixed(2)}s`)}\n`);
     }
 }
 

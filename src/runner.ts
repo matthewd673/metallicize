@@ -71,6 +71,7 @@ const runQueries = async (url:string, queries:TestQuery[], success:TestSuccess) 
     return {
         errors: validateResponse(passthrough, success),
         requestUrl: requestUrl,
+        headers: response.headers,
     }
 }
 
@@ -103,6 +104,7 @@ const runMutations = async (url:string, mutations:TestMutation[], success:TestSu
     return {
         errors: validateResponse(passthrough, success),
         requestUrl: requestUrl,
+        headers: response.headers,
     }
 }
 

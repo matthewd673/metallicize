@@ -9,6 +9,11 @@ npm i -g
 metallicize <test-sequence-file>
 ```
 
+## Options
+Run `metallicize --help` for more information.
+
+* `-d --details`
+
 ## Syntax
 ### Sequences
 A sequence is a series of tests which are executed in order.
@@ -46,13 +51,15 @@ Queries and mutations can also be batched together by defining them in a list us
 *Note: all API calls are automatically batched internally for compatibility with `create-t3-app`'s `AppRouter` settings.*
 
 ### Success
-Success states define the conditions that must be met for a test to pass. Any number of conditions may be included, and they must all exactly match (for now) to pass.
+Success states define the conditions that must be met for a test to pass. Any number of conditions may be included, and they must all match exactly.
 
 |Key|Description|
 |---|---
 `status?:number`|The HTTP status code
 `code?:string`|The `TRPCError` code (e.g.: `NOT_FOUND`)
 `errorMessage?:string`|The custom message attached to a `TRPCError`
+`dataStrict?:boolean`|When `true`, `data` must match the response object *exactly* to pass. Otherwise, only the keys specified in `data` must match.
 `data?:any`|The JSON object returned by a successful request
+`headers?:any`|The response headers. Any headers specified within must match exactly.
 
 *Note: if every field is omitted, the test will always pass.*
