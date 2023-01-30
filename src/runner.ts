@@ -19,16 +19,15 @@ const buildBatchedQueryUrl = (base:string, routes:string[], inputs:any[]) => {
         console.error("Bad batch, mismatched lengths");
     }
 
+    // TODO: batch multiple
     const batchedInput = {
         0: {
             "json": inputs[0]
         }
     };
 
-    // console.log(JSON.stringify(batchedInput));
-
     const inputString = encodeURIComponent(JSON.stringify(batchedInput));
-
+    // TODO: multiple routes in string
     const routeString = routes[0];
 
     // just batch one for now

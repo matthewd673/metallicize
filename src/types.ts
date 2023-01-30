@@ -1,6 +1,7 @@
 interface TestSuccess {
     status?: number;
     code?: number;
+    errorMessage?: number;
     data?: any;
 }
 
