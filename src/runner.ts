@@ -9,6 +9,13 @@ interface TrpcResponse {
     data: any;
 }
 
+interface Result {
+    errors: ValidationResult[];
+    requestUrl: string;
+    headers: Headers;
+    duration: number;
+}
+
 const buildBatchedQueryUrl = (base:string, routes:string[], inputs:any[]) => {
     // correct for potential variations
     base = base.endsWith("/") ? base : base + "/";
@@ -57,7 +64,7 @@ const buildBatchedMutationUrl = (base:string, routes:string[]) => {
     return `${base}${routeString}?batch=${routes.length}`;
 }
 
-const runQueries = async (url:string, queries:TestQuery[], success:TestSuccess) => {
+const runQueries = async (url:string, queries:TestQuery[], success:TestSuccess):Promise<Result> => {
     const requestUrl = buildBatchedQueryUrl(url, queries.map((q) => q.route), queries.map((q) => q.input));
 
     const requestTimer = new Timer();
@@ -82,7 +89,7 @@ const runQueries = async (url:string, queries:TestQuery[], success:TestSuccess) 
     }
 }
 
-const runMutations = async (url:string, mutations:TestMutation[], success:TestSuccess) => {
+const runMutations = async (url:string, mutations:TestMutation[], success:TestSuccess):Promise<Result> => {
     const requestUrl = buildBatchedMutationUrl(url, mutations.map((m) => m.route));
 
     let batchedInput:any = {}
@@ -121,4 +128,4 @@ const runMutations = async (url:string, mutations:TestMutation[], success:TestSu
     }
 }
 
-export { runQueries, runMutations, TrpcResponse };
+export { runQueries, runMutations, TrpcResponse, Result };

@@ -11,13 +11,13 @@ metallicize --help
 ```
 npm run build
 npm i -g
-metallicize <test-sequence-file>
+metallicize <test-sequence-file> [output-csv-file]
 ```
 
 ## Options
 Run `metallicize --help` for more information.
 
-* `-d --details`
+* `-d --detailed`
 * `-t --time`
 
 ## Syntax

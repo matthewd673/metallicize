@@ -1,0 +1,11 @@
+NAME, RESULT, TIME (MS), MESSAGE
+valid query, pass, 19.00, 
+bad query, pass, 11.00, 
+data query, pass, 8.00, 
+bad data query, fail, 8.00, Value of 'farewell' differed,
+mutation, pass, 10.00, 
+query batch, fail, 8.00, 0: Response did not contain error code,1: Response did not contain error code,
+mut batch, pass, 8.00, 
+bad route, fail, 10.00, Expected status 200 but got 404,
+
+hello, fail, 172.00, 
