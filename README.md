@@ -50,7 +50,7 @@ Queries and mutations define tRPC API calls and work like `useQuery()` and `useM
 |Key|Description|
 |---|---
 |`route:string`|A public tRPC query or mutation route
-|`input:any`|An object to be passed as input to the route
+|`input:Object|string`|An object to be passed as input to the route, or a path to a JSON file
 
 Queries and mutations can also be batched together by defining them in a list using `tests.queries` or `tests.mutations`.
 
@@ -65,7 +65,7 @@ Success states define the conditions that must be met for a test to pass. Any nu
 `code?:string`|The `TRPCError` code (e.g.: `NOT_FOUND`)
 `errorMessage?:string`|The custom message attached to a `TRPCError`
 `dataStrict?:boolean`|When `true`, `data` must match the response object *exactly* to pass. Otherwise, only the keys specified in `data` must match.
-`data?:any`|The JSON object returned by a successful request
+`data?:Object|string`|The JSON object expected for a successful request, or a path to a JSON file
 `headers?:any`|The response headers. Any headers specified within must match exactly.
 
 *Note: if every field is omitted, the test will always pass.*

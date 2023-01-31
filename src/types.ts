@@ -3,18 +3,18 @@ interface TestSuccess {
     code?: string;
     errorMessage?: string;
     dataStrict?: boolean;
-    data?: any;
+    data?: Object|string;
     headers?: any;
 }
 
 interface TestQuery {
     route: string;
-    input: any;
+    input: Object|string;
 }
 
 interface TestMutation {
     route: string;
-    input: any;
+    input: Object|string;
 }
 
 interface TestStep {

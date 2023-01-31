@@ -1,4 +1,4 @@
-import { TrpcResponse } from "./runner";
+import { loadObject, TrpcResponse } from "./runner";
 import { TestSuccess } from "./types";
 
 interface ValidationResult {
@@ -24,8 +24,8 @@ const validateHttp = (response:TrpcResponse, success:TestSuccess) => {
     }
 }
 
-const validateTrpcErrors = (data:any, success:TestSuccess) => {
-    const resError = data.error?.json;
+const validateTrpcErrors = (response:any, success:TestSuccess) => {
+    const resError = response.error?.json;
 
     // success.code
     if (success.code && resError?.data?.code) {
@@ -48,12 +48,16 @@ const validateTrpcErrors = (data:any, success:TestSuccess) => {
     }
 }
 
-const validateTrpcSuccesses = (data:any, success:TestSuccess) => {
-    const resData = data.result?.data?.json;
-
+const validateTrpcSuccesses = (response:any, success:TestSuccess, inputFile:string) => {
     // success.data
+    const resData = response.result?.data?.json;
     if (success.data && resData) {
-        const keys = Object.keys(success.data).sort();
+        const data = loadObject(success.data, inputFile);
+        if (!data) { // load failed
+            return `Failed to load data object '${success.data}'`;
+        }
+
+        const keys = Object.keys(data).sort();
 
         // strict
         if (success.dataStrict) {
@@ -71,7 +75,7 @@ const validateTrpcSuccesses = (data:any, success:TestSuccess) => {
         }
 
         for (let i = 0; i < keys.length; i++) {
-            if (success.data[keys[i]] !== resData[keys[i]]) {
+            if (data[keys[i]] !== resData[keys[i]]) {
                 return `Value of '${keys[i]}' differed`;
             }
         }
@@ -81,7 +85,7 @@ const validateTrpcSuccesses = (data:any, success:TestSuccess) => {
     }
 }
 
-const validateResponse = (response:TrpcResponse, success:TestSuccess):ValidationResult[] => {
+const validateResponse = (inputFile:string, response:TrpcResponse, success:TestSuccess):ValidationResult[] => {
     let errors:ValidationResult[] = [];
 
     const httpTests = validateHttp(response, success);
@@ -95,7 +99,7 @@ const validateResponse = (response:TrpcResponse, success:TestSuccess):Validation
 
     for (let i = 0; i < response.data.length; i++) {
         const trpcErrorTests = validateTrpcErrors(response.data[i], success);
-        const trpcSuccessTests = validateTrpcSuccesses(response.data[i], success);
+        const trpcSuccessTests = validateTrpcSuccesses(response.data[i], success, inputFile);
         if (trpcErrorTests) {
             errors.push({
                 pass: false,

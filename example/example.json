@@ -38,9 +38,7 @@
                 }
             },
             "success": {
-                "data": {
-                    "greeting": "Hello Matt2"
-                }
+                "data": "dataGreeting.json"
             }
         },
         {
@@ -94,9 +92,7 @@
             "mutations": [
                 {
                     "route": "example.makeChange",
-                    "input": {
-                        "count": 2
-                    }
+                    "input": "inputCount.json"
                 },
                 {
                     "route": "example.makeChange",

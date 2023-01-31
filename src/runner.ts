@@ -1,4 +1,5 @@
 import fs from "fs";
+import path from "path";
 import { Timer } from "./timer";
 import { TestMutation, TestQuery, TestSuccess } from "./types";
 import { validateResponse, ValidationResult } from "./validator";
@@ -14,6 +15,26 @@ interface Result {
     requestUrl: string;
     headers: Headers;
     duration: number;
+}
+
+const loadObject = (obj:Object|string, inputFile:string) => {
+    if (obj instanceof Object) {
+        return obj;
+    }
+
+    try {
+        // adjust file path if relative
+        let adjPath = obj
+        if (!path.isAbsolute(obj)) {
+            adjPath = path.resolve(path.dirname(inputFile), obj);
+        }
+
+        // pull data and parse
+        const data = fs.readFileSync(adjPath, { encoding: "utf-8" });
+        return JSON.parse(data);
+    } catch (e) {
+        return undefined;
+    }
 }
 
 const buildBatchedQueryUrl = (base:string, routes:string[], inputs:any[]) => {
@@ -64,7 +85,11 @@ const buildBatchedMutationUrl = (base:string, routes:string[]) => {
     return `${base}${routeString}?batch=${routes.length}`;
 }
 
-const runQueries = async (url:string, queries:TestQuery[], success:TestSuccess):Promise<Result> => {
+const runQueries = async (inputFile:string,
+                          url:string,
+                          queries:TestQuery[],
+                          success:TestSuccess,
+                          ):Promise<Result> => {
 
     for (let i = 0; i < queries.length; i++) {
         if (!queries[i].route) {
@@ -76,9 +101,10 @@ const runQueries = async (url:string, queries:TestQuery[], success:TestSuccess):
             }
         }
 
+        queries[i].input = loadObject(queries[i].input, inputFile);
         if (!queries[i].input) {
             return {
-                errors: [ { pass: false, message: "Query does not have input", index: i} ],
+                errors: [ { pass: false, message: "Query does not have input", index: i } ],
                 requestUrl: "undefined",
                 headers: new Headers(),
                 duration: 0,
@@ -99,18 +125,24 @@ const runQueries = async (url:string, queries:TestQuery[], success:TestSuccess):
 
     return {
         errors: validateResponse(
+                    inputFile,
                     {
                         status: response.status,
                         headers: response.headers,
                         data: data,
-                    }, success),
+                    },
+                    success),
         requestUrl: requestUrl,
         headers: response.headers,
         duration: requestTimer.ms(),
     }
 }
 
-const runMutations = async (url:string, mutations:TestMutation[], success:TestSuccess):Promise<Result> => {
+const runMutations = async (inputFile:string,
+                            url:string,
+                            mutations:TestMutation[],
+                            success:TestSuccess
+                            ):Promise<Result> => {
     for (let i = 0; i < mutations.length; i++) {
         if (!mutations[i].route) {
             return {
@@ -121,6 +153,7 @@ const runMutations = async (url:string, mutations:TestMutation[], success:TestSu
             }
         }
 
+        mutations[i].input = loadObject(mutations[i].input, inputFile);
         if (!mutations[i].input) {
             return {
                 errors: [ { pass: false, message: "Mutation does not have input", index: i} ],
@@ -158,15 +191,18 @@ const runMutations = async (url:string, mutations:TestMutation[], success:TestSu
     requestTimer.stop();
 
     return {
-        errors: validateResponse({
+        errors: validateResponse(
+                inputFile,
+                {
                     status: response.status,
                     headers: response.headers,
                     data: data
-                }, success),
+                },
+                success),
         requestUrl: requestUrl,
         headers: response.headers,
         duration: requestTimer.ms(),
     }
 }
 
-export { runQueries, runMutations, TrpcResponse, Result };
+export { runQueries, runMutations, loadObject, TrpcResponse, Result };

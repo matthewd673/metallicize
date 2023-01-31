@@ -44,7 +44,7 @@ const writeOutputNoResult = (file:string, name:string, code:string, message:stri
     );
 }
 
-const execute = async (commands:string, outputFile:string, options:any) => {
+const execute = async (commands:string, inputFile:string, outputFile:string, options:any) => {
 
     const executionTimer = new Timer();
     executionTimer.start();
@@ -122,16 +122,16 @@ const execute = async (commands:string, outputFile:string, options:any) => {
 
         let result = undefined;
         if (query) {
-            result = await runQueries(url, [query], success);
+            result = await runQueries(inputFile, url, [query], success);
         }
         else if (queryBatch) {
-            result = await runQueries(url, queryBatch, success);
+            result = await runQueries(inputFile, url, queryBatch, success);
         }
         else if (mutation) {
-            result = await runMutations(url, [mutation], success);
+            result = await runMutations(inputFile, url, [mutation], success);
         }
         else if (mutationBatch) {
-            result = await runMutations(url, mutationBatch, success);
+            result = await runMutations(inputFile, url, mutationBatch, success);
         }
 
         // no result

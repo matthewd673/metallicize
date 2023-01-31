@@ -25,7 +25,7 @@ program.command("test")
                 return;
             }
 
-            execute(data, output, options);
+            execute(data,  sequence, output, options);
         });
     });
 
