@@ -124,6 +124,7 @@ const execute = async (commands:string) => {
             continue;
         }
 
+        // make sure success is there
         if (!success) {
             process.stdout.write(`${chalk.bgYellow.black(" JSON ")} `);
             process.stdout.write(`${chalk.gray("Success is not defined")}\n`);

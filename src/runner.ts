@@ -65,6 +65,27 @@ const buildBatchedMutationUrl = (base:string, routes:string[]) => {
 }
 
 const runQueries = async (url:string, queries:TestQuery[], success:TestSuccess):Promise<Result> => {
+
+    for (let i = 0; i < queries.length; i++) {
+        if (!queries[i].route) {
+            return {
+                errors: [ { pass: false, message: "Query does not have route", index: i } ],
+                requestUrl: "undefined",
+                headers: new Headers(),
+                duration: 0,
+            }
+        }
+
+        if (!queries[i].input) {
+            return {
+                errors: [ { pass: false, message: "Query does not have input", index: i} ],
+                requestUrl: "undefined",
+                headers: new Headers(),
+                duration: 0,
+            }
+        }
+    }
+
     const requestUrl = buildBatchedQueryUrl(url, queries.map((q) => q.route), queries.map((q) => q.input));
 
     const requestTimer = new Timer();
@@ -90,6 +111,26 @@ const runQueries = async (url:string, queries:TestQuery[], success:TestSuccess):
 }
 
 const runMutations = async (url:string, mutations:TestMutation[], success:TestSuccess):Promise<Result> => {
+    for (let i = 0; i < mutations.length; i++) {
+        if (!mutations[i].route) {
+            return {
+                errors: [ { pass: false, message: "Mutation does not have route", index: i } ],
+                requestUrl: "undefined",
+                headers: new Headers(),
+                duration: 0,
+            }
+        }
+
+        if (!mutations[i].input) {
+            return {
+                errors: [ { pass: false, message: "Mutation does not have input", index: i} ],
+                requestUrl: "undefined",
+                headers: new Headers(),
+                duration: 0,
+            }
+        }
+    }
+
     const requestUrl = buildBatchedMutationUrl(url, mutations.map((m) => m.route));
 
     let batchedInput:any = {}
