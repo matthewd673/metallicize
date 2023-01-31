@@ -173,15 +173,27 @@ const execute = async (commands:string, inputFile:string, outputFile:string, opt
         }
 
         // print details
-        if (options.detailed) {
-            console.log(`${chalk.bgBlue.black(" URL ")}\t${chalk.blue(result.requestUrl)}`)
-            console.log();
+        if (options.print) {
+            // request url
+            if (options.print.indexOf("url") > -1) {
+                console.log(`${chalk.bgBlue.black(" URL ")}\n  ${chalk.blue(result.requestUrl)}`)
+                console.log();
+            }
 
-            let headerString = "\t[\n";
-            result.headers.forEach((value, key) => { headerString += `\t\t{\"${key}\": \"${value}\"},\n`});
-            headerString += "\t]\n";
-            console.log(`${chalk.bgBlue.black(" HEADERS ")}\n${chalk.blue(headerString)}`)
-            console.log();
+            // response headers
+            if (options.print.indexOf("headers") > -1) {
+                let headerString = "  [\n";
+                result.headers.forEach((value, key) => { headerString += `    {\"${key}\": \"${value}\"},\n`});
+                headerString += "  ]\n";
+                console.log(`${chalk.bgBlue.black(" HEADERS ")}\n${chalk.blue(headerString)}`)
+                console.log();
+            }
+
+            // response data
+            if (options.print.indexOf("data") > -1) {
+                let dataString = JSON.stringify(result.raw, null, 2);
+                console.log(`${chalk.bgBlue.black(" DATA ")}\n${chalk.blue(dataString)}`)
+            }
         }
     }
 

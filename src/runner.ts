@@ -15,6 +15,7 @@ interface Result {
     requestUrl: string;
     headers: Headers;
     duration: number;
+    raw: Object;
 }
 
 const loadObject = (obj:Object|string, inputFile:string) => {
@@ -98,6 +99,7 @@ const runQueries = async (inputFile:string,
                 requestUrl: "undefined",
                 headers: new Headers(),
                 duration: 0,
+                raw: {}
             }
         }
 
@@ -108,6 +110,7 @@ const runQueries = async (inputFile:string,
                 requestUrl: "undefined",
                 headers: new Headers(),
                 duration: 0,
+                raw: {}
             }
         }
     }
@@ -135,6 +138,7 @@ const runQueries = async (inputFile:string,
         requestUrl: requestUrl,
         headers: response.headers,
         duration: requestTimer.ms(),
+        raw: data,
     }
 }
 
@@ -150,6 +154,7 @@ const runMutations = async (inputFile:string,
                 requestUrl: "undefined",
                 headers: new Headers(),
                 duration: 0,
+                raw: {},
             }
         }
 
@@ -160,6 +165,7 @@ const runMutations = async (inputFile:string,
                 requestUrl: "undefined",
                 headers: new Headers(),
                 duration: 0,
+                raw: {},
             }
         }
     }
@@ -202,6 +208,7 @@ const runMutations = async (inputFile:string,
         requestUrl: requestUrl,
         headers: response.headers,
         duration: requestTimer.ms(),
+        raw: data,
     }
 }
 

@@ -3,7 +3,7 @@
     "name": "Matthew Daly",
     "url": "https://github.com/matthewd673"
   },
-  "version": "0.0.2",
+  "version": "0.0.3",
   "name": "metallicize",
   "description": "Simple test runner for tRPC.",
   "keywords": [
