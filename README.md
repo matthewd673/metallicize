@@ -4,14 +4,14 @@ Simple test runner for tRPC.
 
 ```
 npm i metallicize -g
-metallicize --help
+metallicize test sequence.json
 ```
 
 ## Build
 ```
 npm run build
 npm i -g
-metallicize <test-sequence-file> [output-csv-file]
+metallicize test <test-sequence-file> [output-csv-file]
 ```
 
 ## Options
