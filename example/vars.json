@@ -1,0 +1,26 @@
+{
+    "name": "vars sequence",
+    "url": "http://localhost:3000/api/trpc",
+    "vars": {
+        "name": "Matt"
+    },
+    "tests": [
+        {
+            "name": "hello query",
+            "query": {
+                "route": "example.hello",
+                "input": {
+                    "text": "{{ name }}"
+                }
+            },
+            "success": {
+                "status": 200,
+                "data": {
+                    "data": {
+                        "greeting": "Hello {{ name }}"
+                    }
+                }
+            }
+        }
+    ]
+}

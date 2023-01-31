@@ -1,7 +1,7 @@
 import fs from "fs";
 import chalk from "chalk";
 import { TestSequence } from "./types";
-import { Result, runMutations, runQueries } from "./runner";
+import { loadObject, Result, runMutations, runQueries } from "./runner";
 import { Timer } from "./timer";
 
 const createOutput = (file:string) => {
@@ -44,12 +44,12 @@ const writeOutputNoResult = (file:string, name:string, code:string, message:stri
     );
 }
 
-const execute = async (commands:string, inputFile:string, outputFile:string, options:any) => {
+const execute = async (inputFileText:string, inputFile:string, outputFile:string, options:any) => {
 
     const executionTimer = new Timer();
     executionTimer.start();
 
-    const sequence: TestSequence = JSON.parse(commands);
+    const sequence: TestSequence = JSON.parse(inputFileText);
 
     process.stdout.write(`${chalk.bgWhite.black(" metallicize ")}\t`);
     process.stdout.write(`Testing '${chalk.bold(sequence.name)}'...\n\n`);
@@ -120,18 +120,20 @@ const execute = async (commands:string, inputFile:string, outputFile:string, opt
             continue;
         }
 
+        const vars = loadObject(sequence.vars ? sequence.vars : {}, inputFile);
+
         let result = undefined;
         if (query) {
-            result = await runQueries(inputFile, url, [query], success);
+            result = await runQueries(inputFile, vars, url, [query], success);
         }
         else if (queryBatch) {
-            result = await runQueries(inputFile, url, queryBatch, success);
+            result = await runQueries(inputFile, vars, url, queryBatch, success);
         }
         else if (mutation) {
-            result = await runMutations(inputFile, url, [mutation], success);
+            result = await runMutations(inputFile, vars, url, [mutation], success);
         }
         else if (mutationBatch) {
-            result = await runMutations(inputFile, url, mutationBatch, success);
+            result = await runMutations(inputFile, vars, url, mutationBatch, success);
         }
 
         // no result

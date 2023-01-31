@@ -1,4 +1,4 @@
-import { loadObject, TrpcResponse } from "./runner";
+import { loadObject, processVars, TrpcResponse } from "./runner";
 import { TestSuccess } from "./types";
 
 interface ValidationResult {
@@ -48,14 +48,15 @@ const validateTrpcErrors = (response:any, success:TestSuccess) => {
     }
 }
 
-const validateTrpcSuccesses = (response:any, success:TestSuccess, inputFile:string) => {
+const validateTrpcSuccesses = (response:any, success:TestSuccess, inputFile:string, vars:any) => {
     // success.data
     const resData = response.result?.data?.json;
     if (success.data && resData) {
-        const data = loadObject(success.data, inputFile);
+        let data = loadObject(success.data, inputFile);
         if (!data) { // load failed
             return `Failed to load data object '${success.data}'`;
         }
+        data = processVars(data, vars).data;
 
         const keys = Object.keys(data).sort();
 
@@ -85,7 +86,7 @@ const validateTrpcSuccesses = (response:any, success:TestSuccess, inputFile:stri
     }
 }
 
-const validateResponse = (inputFile:string, response:TrpcResponse, success:TestSuccess):ValidationResult[] => {
+const validateResponse = (inputFile:string, vars:any, response:TrpcResponse, success:TestSuccess):ValidationResult[] => {
     let errors:ValidationResult[] = [];
 
     const httpTests = validateHttp(response, success);
@@ -99,7 +100,7 @@ const validateResponse = (inputFile:string, response:TrpcResponse, success:TestS
 
     for (let i = 0; i < response.data.length; i++) {
         const trpcErrorTests = validateTrpcErrors(response.data[i], success);
-        const trpcSuccessTests = validateTrpcSuccesses(response.data[i], success, inputFile);
+        const trpcSuccessTests = validateTrpcSuccesses(response.data[i], success, inputFile, vars);
         if (trpcErrorTests) {
             errors.push({
                 pass: false,

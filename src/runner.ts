@@ -38,6 +38,22 @@ const loadObject = (obj:Object|string, inputFile:string) => {
     }
 }
 
+const processVars = (obj:any, vars?:any) => {
+    if (!vars) return obj;
+
+    Object.keys(obj).forEach(k => {
+        if (typeof obj[k] === "string") {
+            Object.keys(vars).forEach(v => {
+                obj[k] = obj[k].replace(new RegExp(`({{ *${v} *}})`), vars[v]);
+            });
+        }
+        else {
+            obj[k] = processVars(obj[k], vars);
+        }
+    });
+    return obj;
+}
+
 const buildBatchedQueryUrl = (base:string, routes:string[], inputs:any[]) => {
     // correct for potential variations
     base = base.endsWith("/") ? base : base + "/";
@@ -87,6 +103,7 @@ const buildBatchedMutationUrl = (base:string, routes:string[]) => {
 }
 
 const runQueries = async (inputFile:string,
+                          vars:Object,
                           url:string,
                           queries:TestQuery[],
                           success:TestSuccess,
@@ -113,6 +130,7 @@ const runQueries = async (inputFile:string,
                 raw: {}
             }
         }
+        queries[i].input = processVars(queries[i].input, vars);
     }
 
     const requestUrl = buildBatchedQueryUrl(url, queries.map((q) => q.route), queries.map((q) => q.input));
@@ -129,6 +147,7 @@ const runQueries = async (inputFile:string,
     return {
         errors: validateResponse(
                     inputFile,
+                    vars,
                     {
                         status: response.status,
                         headers: response.headers,
@@ -143,6 +162,7 @@ const runQueries = async (inputFile:string,
 }
 
 const runMutations = async (inputFile:string,
+                            vars:Object,
                             url:string,
                             mutations:TestMutation[],
                             success:TestSuccess
@@ -168,6 +188,7 @@ const runMutations = async (inputFile:string,
                 raw: {},
             }
         }
+        mutations[i].input = processVars(mutations[i].input, vars);
     }
 
     const requestUrl = buildBatchedMutationUrl(url, mutations.map((m) => m.route));
@@ -199,6 +220,7 @@ const runMutations = async (inputFile:string,
     return {
         errors: validateResponse(
                 inputFile,
+                vars,
                 {
                     status: response.status,
                     headers: response.headers,
@@ -212,4 +234,4 @@ const runMutations = async (inputFile:string,
     }
 }
 
-export { runQueries, runMutations, loadObject, TrpcResponse, Result };
+export { runQueries, runMutations, loadObject, processVars, TrpcResponse, Result };
