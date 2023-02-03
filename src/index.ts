@@ -17,6 +17,7 @@ program.command("test")
     .argument("<test-sequence-file>", "the test sequence to execute")
     .argument("[output-csv-file]", "the file to write CSV results in")
     .option("-p --print <properties...>", "view additional details about each test")
+    .option("-r --run <tests...>", "run only the specified tests")
     .option("-t --time", "show the duration of every test in the command line")
     .action((sequence, output, options) => {
         fs.readFile(sequence, "utf-8", async (error, data) => {

@@ -19,6 +19,7 @@ metallicize test <test-sequence-file> [output-csv-file]
 |Option|Description|
 |---|---
 |`-p --print <properties...>`|Print additional information about each test. **Values:** `url`, `headers`, `data`.
+|`-r --run <names...>`|Run only the specified tests in the sequence.
 |`-t --time`|Print the duration of each test's web request. Time data is always recorded and always included in CSV output.
 
 ## Syntax
@@ -29,6 +30,7 @@ A sequence is a series of tests which are executed in order.
 |---|---
 |`name:string`|The name of the sequence
 |`url:string`|The URL of a tRPC API
+|`vars:any\|string`|An object with variable names (keys) and values, or a path to a JSON file. Variables can be used in `input` or `data` objects (e.g.: `"text": "{{ name }}"`).
 |`tests:test[]`|A list of tests
 
 ### Tests
@@ -51,7 +53,7 @@ Queries and mutations define tRPC API calls and work like `useQuery()` and `useM
 |Key|Description|
 |---|---
 |`route:string`|A public tRPC query or mutation route
-|`input:Object\|string`|An object to be passed as input to the route, or a path to a JSON file
+|`input:any\|string`|An object to be passed as input to the route, or a path to a JSON file
 
 Queries and mutations can also be batched together by defining them in a list using `tests.queries` or `tests.mutations`.
 
@@ -66,7 +68,7 @@ Success states define the conditions that must be met for a test to pass. Any nu
 `code?:string`|The `TRPCError` code (e.g.: `NOT_FOUND`)
 `errorMessage?:string`|The custom message attached to a `TRPCError`
 `dataStrict?:boolean`|When `true`, `data` must match the response object *exactly* to pass. Otherwise, only the keys specified in `data` must match.
-`data?:Object\|string`|The JSON object expected for a successful request, or a path to a JSON file
+`data?:any\|string`|The JSON object expected for a successful request, or a path to a JSON file
 `headers?:any`|The response headers. Any headers specified within must match exactly.
 
 *Note: if every field is omitted, the test will always pass.*

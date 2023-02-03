@@ -81,8 +81,16 @@ const execute = async (inputFileText:string, inputFile:string, outputFile:string
     }
 
     let passed = 0;
+    let totalTests = 0;
     for (let i = 0; i < sequence.tests.length; i++) {
         const test = sequence.tests[i];
+
+        // if --run is specified, only run given tests
+        if (options.run && options.run.indexOf(test.name) === -1) {
+            continue;
+        }
+
+        totalTests++;
 
         process.stdout.write(`${test.name ? test.name : "(unnamed)"}\t`);
 
@@ -203,12 +211,12 @@ const execute = async (inputFileText:string, inputFile:string, outputFile:string
 
     console.log("");
     process.stdout.write(`${chalk.bgWhite.black(" DONE ")} `);
-    if (passed === sequence.tests.length) {
-        process.stdout.write(`${chalk.green(`Passed ${chalk.bold(`${passed}/${sequence.tests.length}`)} tests in ${executionTimer.s().toFixed(2)}s`)}\n`);
+    if (passed === totalTests) {
+        process.stdout.write(`${chalk.green(`Passed ${chalk.bold(`${passed}/${totalTests}`)} tests in ${executionTimer.s().toFixed(2)}s`)}\n`);
         writeOutput(outputFile, "\n" + sequence.name, "pass", executionTimer.ms(), "");
     }
     else {
-        process.stdout.write(`${chalk.red(`Passed ${chalk.bold(`${passed}/${sequence.tests.length}`)} tests in ${executionTimer.s().toFixed(2)}s`)}\n`);
+        process.stdout.write(`${chalk.red(`Passed ${chalk.bold(`${passed}/${totalTests}`)} tests in ${executionTimer.s().toFixed(2)}s`)}\n`);
         writeOutput(outputFile, "\n" + sequence.name, "fail", executionTimer.ms(), "");
     }
 }
